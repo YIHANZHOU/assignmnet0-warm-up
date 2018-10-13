@@ -335,7 +335,7 @@ void Image::FloydSteinbergDither(int nbits)
         Pixel temp1=errorpixel*ALPHA;
 
         SetPixel(x+1,y,GetPixel(x+1,y)+temp1);
-        Pixel temp2=errorpixel*ALPHA;
+        Pixel temp2=errorpixel*GAMMA;
         SetPixel(x,y+1,GetPixel(x,y+1)+temp2);
         Pixel temp3=errorpixel*BETA;
         printf("alpha%f,gamma%f\n",ALPHA,GAMMA);
