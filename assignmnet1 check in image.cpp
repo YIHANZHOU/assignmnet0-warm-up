@@ -352,51 +352,75 @@ double sigma = 1;
 double Gaussion[n][n];
 double mean = n/2;
 double sum = 0.0; // For accumulating the kernel values
-for (int x = 0; x < n; ++x)
+for (int x = 0; x < n; ++x){
     for (int y = 0; y < n; ++y) {
         Gaussion[x][y] = exp( -0.5 * (pow((x-mean)/sigma, 2.0) + pow((y-mean)/sigma,2.0)) )
                          / (2 * M_PI * sigma * sigma);
 
         // Accumulate the kernel values
         sum += Gaussion[x][y];
-    }
-// Normalize the kernel
-for (int x = 0; x < n; ++x)
-    for (int y = 0; y < n; ++y)
-        Gaussion[x][y] /= sum;
 
+
+    }
+  }
+// Normalize the kernel
+for (int x = 0; x < n; ++x){
+    for (int y = 0; y < n; ++y){
+        Gaussion[x][y]= Gaussion[x][y]/sum;
+
+
+}
+}
   Image* temp=new Image(Width(),Height());
     for (int x = (n-1)/2 ; x < Width()-((n-1)/2); x++){
         for (int y= (n-1)/2; y < Height()-((n-1)/2); y++){
-          double r,g,b;
+          double r=0,g=0,b=0;
           for(int i =0;i<n;i++){
             for(int j=0;j<n;j++){
-              r+=int(Gaussion[i][j]*GetPixel(x-(n-1)/2+i,y-(n-1)/2+j).r);
-              g+=int(Gaussion[i][j]*GetPixel(x-(n-1)/2+i,y-(n-1)/2+j).g);
-              b+=int(Gaussion[i][j]*GetPixel(x-(n-1)/2+i,y-(n-1)/2+j).b);
-              printf("r%f,g%g,b%f",r,g,b);
+              r+=Gaussion[i][j]*GetPixel(x-(n-1)/2+i,y-(n-1)/2+j).r;
+              g+=Gaussion[i][j]*GetPixel(x-(n-1)/2+i,y-(n-1)/2+j).g;
+              b+=Gaussion[i][j]*GetPixel(x-(n-1)/2+i,y-(n-1)/2+j).b;
           }
           }
           Pixel p;
-
-          p.SetClamp(double(r),double(g),double(b));
-
+          p.SetClamp(r,g,b);
           temp->SetPixel(x,y,p);
-
         }
-
   }
+
   for (int x = 1 ; x < Width() ; x++){
       for (int y= 1; y < Height(); y++){
         Pixel temp2= temp->GetPixel(x,y);
-
         SetPixel(x,y,temp2);}}
-        
 	/* WORK HERE */
 }
 
 void Image::Sharpen(int n)
 {
+  Image thisImage= Image(Width(),Height());
+  for (int x = 0 ; x < Width() ; x++){
+          for (int y= 0; y < Height(); y++){
+            thisImage.SetPixel(x,y,GetPixel(x,y));}}
+  thisImage.Blur(n);
+  Image* temp=new Image(Width(),Height());
+  // printf("tempweight%stempheight%s\n",temp.Width(),temp.Height() );
+  // printf("weight%spheight%s\n",Width(),Height());
+  // for (int x = 0 ; x < Width() ; x++){
+  //     for (int y= 0; y < Height(); y++){
+  //       Pixel temp2= GetPixel(x,y);
+  //       temp.SetPixel(x,y,temp2);}}
+        // printf("x%dfy%d\n",x,y);
+  for (int x =0 ; x < Width() ; x++){
+      for (int y= 0; y < Height(); y++){
+        Pixel blur=GetPixel(x,y);
+        Pixel blurblur=thisImage.GetPixel(x,y);
+        temp->SetPixel(x,y,PixelLerp(blur,blurblur,-0.5);}}
+    for (int x = 0 ; x < Width() ; x++){
+            for (int y= 0; y < Height(); y++){
+              Pixel temp2= temp->GetPixel(x,y);
+              SetPixel(x,y,temp2);}}
+
+
 	/* WORK HERE */
 }
 static int Filter[3][3] =
