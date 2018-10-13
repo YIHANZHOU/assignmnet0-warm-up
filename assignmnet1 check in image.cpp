@@ -322,23 +322,29 @@ const double
 
 void Image::FloydSteinbergDither(int nbits)
 {
+
   if (nbits>7)return;
-  for (int x = 1 ; x < Width()-1 ; x++){
-  		for (int y= 0; y < Height()-1; y++){
+  for (int y= 0; y < Height()-1; y++){
+  		for (int x= 1; x < Width()-1; x++){
         Pixel p=GetPixel(x,y);
-        Pixel alpha=GetPixel(x+1,y);
-        Pixel beta=GetPixel(x-1,y+1);
-        Pixel gamma=GetPixel(x,y+1);
-        Pixel delta=GetPixel(x+1,y+1);
-        double er=ALPHA*alpha.r+BETA*beta.r+GAMMA*gamma.r+DELTA*delta.r;
-        double eg=ALPHA*alpha.g+BETA*beta.g+GAMMA*gamma.g+DELTA*delta.g;
-        double eb=ALPHA*alpha.b+BETA*beta.b+GAMMA*gamma.b+DELTA*delta.b;
-        Component r = trunc(p.r +er + 0.5);
-        Component g = trunc(p.r +eg + 0.5);
-        Component b = trunc(p.b +eb + 0.5);
-        Pixel dither;
-        dither.SetClamp(r,g,b);
-        SetPixel(x,y,PixelQuant(p, nbits));   // for(int i=)
+        Pixel q=PixelQuant(p,nbits);
+        double er=p.r-q.r;
+        double eg=p.g-q.g;
+        double eb=p.b-q.b;
+        Pixel errorpixel=Pixel(er,eg,eb);
+        Pixel temp1=errorpixel*ALPHA;
+
+        SetPixel(x+1,y,GetPixel(x+1,y)+temp1);
+        Pixel temp2=errorpixel*ALPHA;
+        SetPixel(x,y+1,GetPixel(x,y+1)+temp2);
+        Pixel temp3=errorpixel*BETA;
+        printf("alpha%f,gamma%f\n",ALPHA,GAMMA);
+
+        SetPixel(x-1,y+1,GetPixel(x-1,y+1)+temp3);
+        Pixel temp4=errorpixel*DELTA;
+        SetPixel(x+1,y+1,GetPixel(x+1,y+1)+temp4);
+        SetPixel(x,y,q);
+          // for(int i=)
 }
 }
 	/* WORK HERE */
