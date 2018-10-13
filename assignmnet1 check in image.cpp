@@ -236,19 +236,24 @@ void Image::Quantize (int nbits)
 
 void Image::RandomDither (int nbits)
 {
+  srand(time(NULL));
   if (nbits>7)return;
   for (int x = 0 ; x < Width() ; x++){
   		for (int y= 0 ; y < Height() ; y++){
         Pixel p=GetPixel(x,y);
-        double randomnoise=rand()%(2^(8-nbits))-(2^(7-nbits));
-        Component r = trunc(p.r +randomnoise + 0.5);
-        Component g = trunc(p.r +randomnoise + 0.5);
-        Component b = trunc(p.b + randomnoise + 0.5);
+        int rando=rand()%100;
+        double randomnoise=rando*1.0/101;
+        int temp=2<<(8-nbits-1);
+        //printf("randomnoise%f,trunc%f\n",(p.r*1.0/temp),trunc(p.r*1.0/temp));
+
+        Component r = int(trunc(p.r*1.0/temp +randomnoise+0.5 ))<<(8-nbits);
+        Component g = int(trunc(p.g*1.0/temp +randomnoise +0.5))<<(8-nbits);
+        Component b = int(trunc(p.b*1.0/temp+randomnoise+0.5))<<(8-nbits);
+
+        randomnoise=0;
         Pixel dither;
         dither.SetClamp(r,g,b);
-        SetPixel(x,y,PixelQuant(p, nbits));
-
-
+        SetPixel(x,y,dither);
         	/* WORK HERE */
 }
 }
@@ -272,34 +277,35 @@ void Image::OrderedDither(int nbits)
      int i=x % 4;
      int j=y % 4;
      Pixel p=GetPixel(x,y);
-     double re=double(p.r-trunc(p.r));
-     double ge=double(p.g-trunc(p.g));
-     double be=double(p.b-trunc(p.b));
+     double re=double(p.r-p.r>>(8-nbits)<<(8-nbits));
+     double ge=double(p.g-p.g>>(8-nbits)<<(8-nbits));
+     double be=double(p.b-p.b>>(8-nbits)<<(8-nbits));
      double r,g,b;
      if(re>Bayer4[i][j]){
-       r=ceil(p.r);
+       r=p.r>>(8-nbits)<<(8-nbits)+(2>>nbits);
      }else{
-       r=floor(p.r);
+       r=p.r>>(8-nbits)<<(8-nbits);
      }
 
      if(ge>Bayer4[i][j]){
-       g=ceil(p.g);
+       g=p.g>>(8-nbits)<<(8-nbits)+(2>>nbits);
      }else{
-       g=floor(p.g);
+       g=p.g>>(8-nbits)<<(8-nbits);
      }
 
      if(be>Bayer4[i][j]){
-       b=ceil(p.b);
+       b=p.b>>(8-nbits)<<(8-nbits)+(2>>nbits);
      }else{
-       b=floor(p.b);
+       b=p.b>>(8-nbits)<<(8-nbits);
      }
      Pixel temp;
      temp.SetClamp(r,g,b);
-     SetPixel(x,y,PixelQuant(temp,nbits));
+     SetPixel(x,y,temp);
 
    }
   }
   }
+
 
 
 
